@@ -1,0 +1,51 @@
+version: '3.7'
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: fwst-server
+    container_name: fwst-node-server
+    ports:
+      - "3001:3001"
+    depends_on:
+      - mongo
+    environment:
+      - NODE_ENV=development
+    networks:
+      - fwst-app-network
+  mongo:
+    image: mongo:4.4
+    volumes:
+      - data-volume:/data
+    ports:
+      - "27017:27017"
+    networks:
+      - fwst-app-network
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    image: fwst-client
+    container_name: fwst-react-client
+    command: npm start
+    volumes:
+      - ./client/:/usr/app
+      - /usr/app/node_modules
+    depends_on:
+      - server
+    ports:
+      - "3000:3000"
+    networks:
+      - fwst-app-network
+
+networks:
+    fwst-app-network:
+        driver: bridge
+
+volumes:
+    data-volume:
+    node_modules:
+    web-root:
+      driver: local
